@@ -8,6 +8,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.FancyMachineUIWidget;
+import com.gregtechceu.gtceu.api.gui.fancy.IFancyTooltip;
 import com.gregtechceu.gtceu.api.gui.fancy.IFancyUIProvider;
 import com.gregtechceu.gtceu.api.gui.fancy.TooltipsPanel;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
@@ -121,6 +122,8 @@ public class WorkableElectricMultiblockMachine extends WorkableMultiblockMachine
 
     @Override
     public void attachTooltips(TooltipsPanel tooltipsPanel) {
+        self().getTraits().stream().filter(IFancyTooltip.class::isInstance).map(IFancyTooltip.class::cast)
+                .forEach(tooltipsPanel::attachTooltips);
         for (IMultiPart part : getParts()) {
             part.attachFancyTooltipsToController(this, tooltipsPanel);
         }
