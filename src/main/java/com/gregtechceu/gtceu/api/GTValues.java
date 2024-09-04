@@ -115,7 +115,8 @@ public class GTValues {
             MODID_CURIOS = "curios",
             MODID_AE2WTLIB = "ae2wtlib",
             MODID_SHIMMER = "shimmer",
-            MODID_JAVD = "javd";
+            MODID_JAVD = "javd",
+            MODID_TOOLBELT = "toolbelt";
 
     /**
      * Spray painting compat modids

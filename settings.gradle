@@ -35,6 +35,7 @@ dependencyResolutionManagement {
         def curiosForgeVersion = "5.9.1"
         def worldStripperForgeFile = "4578579"
         def javdVersion = "4803995"
+        def toolbeltVersion = "5393183"
 
         // Libs
         def quiltMappingsVersion = "5"  // https://lambdaurora.dev/tools/import_quilt.html
@@ -113,6 +114,9 @@ dependencyResolutionManagement {
 
             def javd = version("javd", javdVersion)
             library("javd", "curse.maven", "javd-370890").versionRef(javd)
+
+            def toolbelt = version("toolbelt", toolbeltVersion)
+            library("toolbelt", "curse.maven", "toolbelt-260262").versionRef(toolbelt)
         }
 
         libs {

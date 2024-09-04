@@ -86,6 +86,10 @@ public class GTCEu {
         return LDLib.isModLoaded(GTValues.MODID_JAVD);
     }
 
+    public static boolean isToolbeltLoaded() {
+        return LDLib.isModLoaded(GTValues.MODID_TOOLBELT);
+    }
+
     @Deprecated(forRemoval = true, since = "1.0.21")
     public static boolean isHighTier() {
         return GTCEuAPI.isHighTier();

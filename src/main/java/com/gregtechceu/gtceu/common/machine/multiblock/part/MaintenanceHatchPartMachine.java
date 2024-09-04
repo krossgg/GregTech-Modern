@@ -1,5 +1,6 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part;
 
+import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.item.tool.GTToolType;
@@ -37,6 +38,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
+import dev.gigaherz.toolbelt.BeltFinder;
+import dev.gigaherz.toolbelt.belt.ToolBeltInventory;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
@@ -255,6 +258,22 @@ public class MaintenanceHatchPartMachine extends TieredPartMachine
 
                         if (toolsToMatch.stream().allMatch(Objects::isNull)) {
                             return;
+                        }
+                    }
+                }
+
+                if (GTCEu.isToolbeltLoaded()) {
+                    var getter = BeltFinder.findBelt(entityPlayer);
+                    if (getter.isPresent()) {
+                        ToolBeltInventory inv = new ToolBeltInventory(getter.get().getBelt());
+                        for (int slot = 0; slot < inv.getSlots(); slot++) {
+                            var stack = inv.getStackInSlot(slot);
+                            if (ToolHelper.is(stack, toolToMatch)) {
+                                fixProblemWithTool(i, stack, entityPlayer);
+                            }
+                            if (toolsToMatch.stream().allMatch(Objects::isNull)) {
+                                return;
+                            }
                         }
                     }
                 }
