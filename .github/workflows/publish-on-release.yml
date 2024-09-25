@@ -1,0 +1,71 @@
+name: Publish on Release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      MAVEN_USER: ${{ secrets.MAVEN_USER }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
+
+      - name: Build
+        run: ./gradlew build --build-cache
+
+      - name: Publish to Maven
+        run: ./gradlew publish --build-cache
+
+      - name: Get Version
+        id: ver
+        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
+
+      - name: mc-publish-forge
+        uses: Kir-Antipov/mc-publish@v3.3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-prerelease: false
+
+          # Only include this section if you wish to publish
+          # your assets on Modrinth.
+          modrinth-id: 7tG215v7
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          # Only include this section if you wish to publish
+          # your assets on CurseForge.
+          curseforge-id: 890405
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: |
+            build/libs/!(*-@(dev|dev-all|dev-slim|sources|javadoc|dev-shadow|slim)).jar
+            build/libs/*-@(dev|sources|javadoc|dev-shadow|slim).jar
+
+          name: GregTechCEu ${{ github.ref }}
+          version: mc${{ github.ref }}
+          version-type: beta
+
+          loaders: forge
+          java: 17
+          retry-attempts: 2
+          retry-delay: 10000
+          fail-mode: fail
+
+      - name: Bump Version
+        run: |
+          git switch -c gh/ver-bump
+          VER=$(awk 'NR == 6 {print $3}' gradle.properties)
+          BUMP=$(./scripts/bump.sh $VER)
+          sed -i "s/= ${VER}/= ${NEW_VER}/" gradle.properties
+          git commit -am "Bump version"
+          git push
+          gh pr create -B 1.20.1 -H gh/ver-bump --title "Bump version to $NEW_VER" --body "Created by GH Workflow"

@@ -6,7 +6,7 @@ on:
       - '1.20.1'
 
 concurrency:
-  group: auto-build-${{ github.head_ref || github.ref }}
+  group: auto-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -44,7 +44,10 @@ jobs:
         id: release
         uses: Kir-Antipov/mc-publish@v3.3.0
         with:
-          github-tag: ${{ steps.var.outputs.version }}
+          name: SNAPSHOT - ${{ github.ref_name}}
+          github-tag: SNAPSHOT-${{ github.ref_name }}
+          github-prerelease: true
+          github-generate-changelog: true
           github-token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             build/libs/!(*-@(dev|dev-all|dev-slim|javadoc)).jar
