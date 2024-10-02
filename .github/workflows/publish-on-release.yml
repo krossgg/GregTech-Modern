@@ -14,15 +14,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Build
         uses: ./.github/actions/build_setup
-        with:
-          update-cache: true
       - name: Version Check
         id: check
         run: |
           VER=$(./gradlew -q printVersion | awk -F- '{print "v"$2}')
           if [[ "$VER" = ${{ github.event.release.tag_name }} ]]; then exit 0; else exit 1; fi
       - name: Build
-        run: ./gradlew build --build-cache
+        run: ./gradlew assemble --build-cache
       - name: Get Version from Gradle
         id: ver
         run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
@@ -95,16 +93,18 @@ jobs:
       # After release, PR ver bump to gradle.properties
       - name: Bump Version
         if: ${{ success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git switch -c gh/ver-bump
+          git switch -C gh/ver-bump
           VER=$(awk '$1 == "mod_version" {print $3}' gradle.properties)
           MC_VER=$(echo ${{ needs.build.outputs.VERSION }} | awk -F- '{print $1}')
           BUMPED=$(echo $VER | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
           sed -i "s/= ${VER}/= ${BUMPED}/" gradle.properties
           git commit -am "Bump version"
-          git push --set-upstream origin gh/ver-bump
+          git push --force --set-upstream origin gh/ver-bump
           gh pr create -B $MC_VER -H gh/ver-bump --title "Bump version to $BUMPED" --body "Created by GH Workflow"
 
       # Change release to draft if something failed above
