@@ -11,6 +11,7 @@ jobs:
     outputs:
       VERSION: ${{ steps.ver.outputs.version }}
     steps:
+      - uses: actions/checkout@v4
       - name: Setup Build
         uses: ./.github/actions/build_setup
       - name: Version Check
