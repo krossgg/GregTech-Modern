@@ -6,19 +6,57 @@ on:
 
 jobs:
   check:
+    name: Check Tag
     runs-on: ubuntu-latest
-    outputs:
-      status: ${{ steps.check.outcome }}
     steps:
       - name: Version Check
         id: check
         run: |
-          VER=$(./gradlew -q printVersion | awk -F- '{print "v"$2})
+          VER=$(./gradlew -q printVersion | awk -F- '{print "v"$2}')
           if [[ "$VER" = ${{ github.event.release.tag_name }} ]]; then exit 0; else exit 1; fi
 
   build:
+    name: Build
     needs: check
-    if: needs.check.outputs.status == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
+      - name: Build
+        run: ./gradlew assemble --build-cache
+      - name: Get Version from Gradle
+        id: ver
+        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/libs/*
+          if-no-files-found: error
+          retention-days: 3
+
+  upload-release-artifacts:
+    name: Upload Release Artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/libs/!(*-@(dev|dev-all|dev-slim|javadoc)).jar
+
+  publish:
+    name: Publish to Maven, CF, Modrinth
+    needs: build
     runs-on: ubuntu-latest
     env:
       MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
@@ -27,31 +65,21 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          submodules: true
-
-      - name: Setup Build
-        uses: ./.github/actions/build_setup
-
-      - name: Build
-        run: ./gradlew build --build-cache
+          name: build-artifacts
 
       - name: Publish to Maven
         if: github.event.release.name != 'simulate'
         run: ./gradlew publish --build-cache
 
-      - name: Get Version
-        id: ver
-        run: echo "version=$(./gradlew -q printVersion)" >> $GITHUB_OUTPUT
-
       - name: Publish Mod
-        uses: Kir-Antipov/mc-publish@v3.3.0
         if: github.event.release.name != 'simulate'
+        uses: Kir-Antipov/mc-publish@v3.3.0
         with:
           modrinth-id: 7tG215v7
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
           curseforge-id: 890405
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
@@ -59,38 +87,28 @@ jobs:
             build/libs/!(*-@(dev|dev-all|dev-slim|sources|javadoc|dev-shadow|slim)).jar
             build/libs/*-@(dev|sources|javadoc|dev-shadow|slim).jar
 
-          name: GregTechCEu ${{ steps.ver.outputs.version }}
-          version: mc${{ steps.ver.outputs.version }}
+          name: GregTechCEu ${{ needs.build.outputs.VERSION }}
+          version: mc${{ needs.build.outputs.VERSION }}
           version-type: beta
-
           loaders: forge
           java: 17
-          retry-attempts: 2
-          retry-delay: 10000
           fail-mode: fail
 
-      - name: Upload to GH Release
-        uses: softprops/action-gh-release@v2
+      # After release, PR ver bump to gradle.properties
+      - name: Bump Version
         if: ${{ success() }}
-        with:
-          files: |
-            build/libs/!(*-@(dev|dev-all|dev-slim|sources|javadoc|dev-shadow|slim)).jar
-            build/libs/*-@(dev|sources|javadoc|dev-shadow|slim).jar
+        run: |
+          git switch -c gh/ver-bump
+          VER=$(awk '$1 == "mod_version" {print $3}' gradle.properties)
+          MC_VER=$(echo ${{ needs.build.outputs.VERSION }} | awk -F- '{print $1}')
+          BUMPED=$(echo $VER | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
+          sed -i "s/= ${VER}/= ${BUMPED}/" gradle.properties
+          git commit -am "Bump version"
+          git push
+          gh pr create -B $MC_VER -H gh/ver-bump --title "Bump version to $BUMPED" --body "Created by GH Workflow"
 
       # Change release to draft if something failed above
       - name: Edit Failed Release
         if: ${{ failed() }}
         run: |
           gh release edit ${{ github.event.release.tag_name }} --draft=true
-
-      # After release, update gradle.properties
-      - name: Bump Version
-        if: ${{ success() }}
-        run: |
-          git switch -c gh/ver-bump
-          VER=$(awk '$1 == "mod_version" {print $3}' gradle.properties)
-          BUMPED=$(echo $VER | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)
-          sed -i "s/= ${VER}/= ${BUMPED}/" gradle.properties
-          git commit -am "Bump version"
-          git push
-          gh pr create -B 1.20.1 -H gh/ver-bump --title "Bump version to $BUMPED" --body "Created by GH Workflow"
