@@ -9,7 +9,8 @@ jobs:
     name: Check Tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Setup Build
+        uses: ./.github/actions/build_setup
       - name: Version Check
         id: check
         run: |
@@ -23,9 +24,6 @@ jobs:
     outputs:
       VERSION: ${{ steps.ver.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Build
-        uses: ./.github/actions/build_setup
       - name: Build
         run: ./gradlew assemble --build-cache
       - name: Get Version from Gradle
