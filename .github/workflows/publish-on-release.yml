@@ -52,7 +52,7 @@ jobs:
       - name: Upload artifacts to release
         uses: softprops/action-gh-release@v2
         with:
-          files: !(*-@(dev|dev-all|dev-slim|javadoc)).jar
+          files: ./!(*-@(dev|dev-all|dev-slim|javadoc)).jar
           fail_on_unmatched_files: true
 
   publish:
@@ -82,8 +82,8 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
           files: |
-            !(*-@(dev|dev-all|dev-slim|sources|javadoc|dev-shadow|slim)).jar
-            *-@(dev|sources|javadoc|dev-shadow|slim).jar
+            ./!(*-@(dev|dev-all|dev-slim|sources|javadoc|dev-shadow|slim)).jar
+            ./*-@(dev|sources|javadoc|dev-shadow|slim).jar
 
           name: GregTechCEu ${{ needs.build.outputs.VERSION }}
           version: mc${{ needs.build.outputs.VERSION }}
