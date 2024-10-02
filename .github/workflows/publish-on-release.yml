@@ -9,6 +9,7 @@ jobs:
     name: Check Tag
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Version Check
         id: check
         run: |
