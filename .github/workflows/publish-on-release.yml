@@ -109,6 +109,6 @@ jobs:
 
       # Change release to draft if something failed above
       - name: Edit Failed Release
-        if: ${{ failed() }}
+        if: ${{ failure() }}
         run: |
           gh release edit ${{ github.event.release.tag_name }} --draft=true
