@@ -90,6 +90,8 @@ jobs:
       - name: Bump Version
         if: ${{ success() }}
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c gh/ver-bump
           VER=$(awk '$1 == "mod_version" {print $3}' gradle.properties)
           MC_VER=$(echo ${{ needs.build.outputs.VERSION }} | awk -F- '{print $1}')
@@ -102,5 +104,7 @@ jobs:
       # Change release to draft if something failed above
       - name: Edit Failed Release
         if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release edit ${{ github.event.release.tag_name }} --draft=true
