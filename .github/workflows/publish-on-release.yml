@@ -5,9 +5,11 @@ on:
     types: [released]
 
 jobs:
-  check:
-    name: Check Tag
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.ver.outputs.version }}
     steps:
       - name: Setup Build
         uses: ./.github/actions/build_setup
@@ -16,14 +18,6 @@ jobs:
         run: |
           VER=$(./gradlew -q printVersion | awk -F- '{print "v"$2}')
           if [[ "$VER" = ${{ github.event.release.tag_name }} ]]; then exit 0; else exit 1; fi
-
-  build:
-    name: Build
-    needs: check
-    runs-on: ubuntu-latest
-    outputs:
-      VERSION: ${{ steps.ver.outputs.version }}
-    steps:
       - name: Build
         run: ./gradlew assemble --build-cache
       - name: Get Version from Gradle
@@ -36,6 +30,7 @@ jobs:
           path: build/libs/*
           if-no-files-found: error
           retention-days: 3
+
 
   upload-release-artifacts:
     name: Upload Release Artifacts
@@ -64,14 +59,11 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - uses: actions/checkout@v4
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-
-      - name: Publish to Maven
-        if: github.event.release.name != 'simulate'
-        run: ./gradlew publish --build-cache
 
       - name: Publish Mod
         if: github.event.release.name != 'simulate'
