@@ -6,6 +6,10 @@ inputs:
     description: If cache should be updated
     required: false
     default: 'false'
+  branch:
+    description: 'Branch to checkout'
+    required: false
+    default: '1.20.1'
 
 runs:
   using: 'composite'
@@ -13,13 +17,13 @@ runs:
   steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        ref: ${{ inputs.branch }}
 
-    - name: Set up JDK 17
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        distribution: adopt
-        java-version: 17
+        distribution: temurin
+        java-version: ${{ inputs.branch == '1.20.1' && '17' || '21' }}
 
     - name: Validate Gradle wrapper
       uses: gradle/actions/wrapper-validation@v3
