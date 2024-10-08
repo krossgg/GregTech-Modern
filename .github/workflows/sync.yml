@@ -18,6 +18,11 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C gh/workflow-sync
+      - uses: actions/checkout@v4
+        with:
+          ref: '1.20.1'
+          sparse-checkout: '.github'
+      - run: |
           git checkout origin/1.20.1 -- .github
           git commit -am "Sync Workflows"
           git push --force --set-upstream origin gh/workflow-sync
