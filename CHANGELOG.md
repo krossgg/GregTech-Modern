@@ -1,5 +1,43 @@
 # ChangeLog
 
+## 📦 Uncategorized
+
+- Replace wrench with plate in bender recipe
+   - PR: #2057
+- Machine Ownership
+   - PR: #1970
+- Give coils an actual EU discount in EBF
+   - PR: #2055
+- Fix Steam Multiblocks allowing greater than LV recipes
+   - PR: #2058
+- Update tooltip capitalization for consistency
+   - PR: #2061
+- Update manage-pr-labels.yml
+   - PR: #2062
+- Misc recipe fixes
+   - PR: #2056
+- Torch Behaviour, now with less duping
+   - PR: #2067
+- Multiblock Display Text for Outputs
+   - PR: #2048
+- Make magnetic tool property pull mob drops too
+   - PR: #2037
+- Fix broken treated wood recipes
+   - PR: #2045
+- Remove #forge:seeds seed oil recipe
+   - PR: #2041
+- Remove any connected miner pipes when the machine is removed
+   - PR: #2064
+- Add missing flags for materials
+   - PR: #2024
+- Yeet Sand from OreVeins
+   - PR: #2078
+- Output Line Infinite formatting
+   - PR: #2082
+- AE2 Integration: Use smart cable connection type for ME Connected blocks
+   - PR: #2087
+
+
 Version: 1.4.1
 
 ### ADDITIONS:
