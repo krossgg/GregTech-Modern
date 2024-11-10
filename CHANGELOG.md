@@ -1,5 +1,11 @@
 # ChangeLog
 
+## Version [v1.5.1-1.21](https://github.com/krossgg/GregTech-Modern/compare/v1.5.0-1.21...v1.5.1-1.21)
+### Added
+
+- Sync Workflows with 1.20.1 by @github-actions[bot] in [#42](https://github.com/krossgg/GregTech-Modern/pull/42)
+
+ 
 Version: 1.4.1
 
 # **1.21 IS A *VERY* BREAKING UPDATE, DO NOT TRY TO UPDATE FROM 1.20.1 OR 1.19.2**
