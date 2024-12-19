@@ -15,9 +15,7 @@ String version_toml = "$version" + (suffix ? "-$suffix" : "")
 
 task printVersion {
     doLast {
-        println "mod_version " + mod_version
-        println "version " + version
-        println "toml " + version_toml
+        println mod_version
     }
 }
 
