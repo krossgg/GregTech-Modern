@@ -38,7 +38,7 @@ public class GTCEu {
     }
 
     public static void init() {
-        LOGGER.info("{} is initializing...", NAME);
+        LOGGER.info("{} is initializing... xd", NAME);
     }
 
     public static ResourceLocation id(String path) {
