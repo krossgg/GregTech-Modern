@@ -29,4 +29,8 @@ runs:
       with:
         cache-write-only: ${{ inputs.update-cache }}
         cache-read-only: ${{ github.ref != 'refs/heads/1.20.1' && github.ref != 'refs/heads/1.21' }}
-        add-job-summary: 'on-failure'
+        add-job-summary: 'always'
+        gradle-home-cache-includes: |
+          caches
+          caches/neoformruntime
+          notifications
